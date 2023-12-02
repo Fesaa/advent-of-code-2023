@@ -20,6 +20,7 @@ func main() {
 	scanner := bufio.NewScanner(file)
 
 	sum := 0
+	sum2 := 0
 	game := 1
 
 	for scanner.Scan() {
@@ -27,6 +28,7 @@ func main() {
 		if canPlay(r, g, b) {
 			sum += game
 		}
+		sum2 += r * g * b
 		game++
 
 	}
@@ -35,7 +37,7 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println(sum)
+	fmt.Println(sum, sum2)
 }
 
 var maxR, maxG, maxB int = 12, 13, 14
