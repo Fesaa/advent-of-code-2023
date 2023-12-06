@@ -12,8 +12,8 @@ struct Range {
 };
 
 struct Race {
-  int time;
-  int distance;
+  long time;
+  long distance;
 
   double d(double tw) { return tw * (time - tw); }
   Range getWinningRange() {
@@ -26,9 +26,11 @@ struct Race {
   };
 };
 
-vector<int> extractNumbers(string s, string delim);
+vector<long> extractNumbers(string s, string delim, bool resetOnSpace);
 
-int part1(vector<Race> races);
+long part1(vector<Race> races);
+
+long part2(Race race);
 
 int main() {
 
@@ -41,34 +43,40 @@ int main() {
   }
 
   vector<Race> races = {};
+  Race fullRace;
 
   string line;
-  int i = 0;
+  long i = 0;
   while (getline(inputFile, line)) {
     if (i == 0) {
-      for (int time : extractNumbers(line, ":")) {
+      for (long time : extractNumbers(line, ":", true)) {
         races.push_back(Race{.time = time});
       }
+      fullRace = Race{.time = extractNumbers(line, ":", false)[0]};
     } else if (i == 1) {
-      vector<int> ds = extractNumbers(line, ":");
-      for (int j = 0; j < ds.size(); j++) {
+      vector<long> ds = extractNumbers(line, ":", true);
+      for (long j = 0; j < ds.size(); j++) {
         races[j].distance = ds[j];
       }
+      fullRace.distance = extractNumbers(line, ":", false)[0];
     }
     i++;
   }
 
-  printf("Part1: %d\n", part1(races));
+  printf("Part1: %ld\n", part1(races));
+  printf("Part2: %ld\n", part2(fullRace));
 
   return 0;
 }
 
-int part1(vector<Race> races) {
-  int mul = 1;
+long part2(Race race) { return part1({race}); }
+
+long part1(vector<Race> races) {
+  long mul = 1;
   for (Race race : races) {
     Range winningRange = race.getWinningRange();
-    int minW = ceil(winningRange.lowerbound);
-    int maxW = floor(winningRange.upperbound);
+    long minW = ceil(winningRange.lowerbound);
+    long maxW = floor(winningRange.upperbound);
 
     if (race.d(minW) == (double)race.distance) {
       minW++;
@@ -83,21 +91,23 @@ int part1(vector<Race> races) {
   return mul;
 }
 
-vector<int> extractNumbers(string s, string delim) {
+vector<long> extractNumbers(string s, string delim, bool resetOnSpace) {
   s = s.substr(s.find(delim) + 1, s.length());
 
-  vector<int> numbers = {};
-  int digit = 0;
+  vector<long> numbers = {};
+  long digit = 0;
   for (char c : s) {
     if (c == ' ') {
-      if (digit != 0) {
+      if (digit != 0 && resetOnSpace) {
         numbers.push_back(digit);
       }
-      digit = 0;
+      if (resetOnSpace) {
+        digit = 0;
+      }
       continue;
+    } else {
+      digit = digit * 10 + (c - '0');
     }
-
-    digit = digit * 10 + (c - '0');
   }
 
   if (digit != 0) {
