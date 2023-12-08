@@ -1,2 +1,4 @@
 *.txt
 out
+target/
+input
