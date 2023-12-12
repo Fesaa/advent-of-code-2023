@@ -1,48 +1,37 @@
 with open("input") as f:
     input = f.read().strip().split("\n")
 
-def replacer(s, newstring, index, nofail=False):
-    if not nofail and index not in range(len(s)):
-        raise ValueError("index outside given string")
 
-    if index < 0:  # add it to the beginning
-        return newstring + s
-    if index > len(s):  # add it to the end
-        return s + newstring
-
-    return s[:index] + newstring + s[index + 1:]
-
-records: list[tuple[str, list[int], int]] = []
+records: list[tuple[str, list[int]]] = []
 for line in input:
     p = line.split(" ")
     c = list(map(int, p[1].split(",")))
-    records.append((p[0], c, sum(c)))
+    records.append((p[0], c))
 
-def is_valid(record: tuple[str, list[int], int]) -> bool:
-    counts = []
-    cur = 0
-    for s in record[0]:
-        if s == "#":
-            cur += 1
+def permutations(s: str, counts: list[int]) -> int:
+    if s == "":
+        return 1 if len(counts) == 0 else 0
+
+    if len(counts) == 0:
+        return 1 if "#" not in s else 0
+
+    perms: int = 0
+
+    if s[0] in (".", "?"):
+        perms += permutations(s[1:], counts)
+
+    if s[0] in ("#", "?"):
+        if counts[0] > len(s):
+            return perms
+        if counts[0] != len(s) and s[counts[0]] == "#":
+            return perms
+        if "."in s[:counts[0]]:
+            return perms
+        if counts[0] == len(s):
+            perms += permutations("", counts[1:])
         else:
-            if cur != 0:
-                counts.append(cur)
-            cur = 0
-    if cur != 0:
-        counts.append(cur)
-    return counts == record[1]
+            perms += permutations(s[counts[0]+1:], counts[1:])
+    return perms
 
-def permuations(record: tuple[str, list[int], int]) -> int:
-    if record[0].count("#") == record[2]:
-        return 1 if is_valid(record) else 0
-    if "?" not in record[0]:
-        return 1 if is_valid(record) else 0
-    else:
-        i = record[0].index("?")
-        a = permuations((replacer(record[0], "#", i), record[1], record[2]))
-        b = permuations((replacer(record[0], ".", i), record[1], record[2]))
-        return a + b
+print("Part 2:", sum(permutations(r[0], r[1]) for r in records), "valid messages")
 
-
-
-print("Part 1: ", sum(map(permuations, records)))
