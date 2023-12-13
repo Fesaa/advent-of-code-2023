@@ -8,15 +8,16 @@ using namespace std;
 struct LandScape {
   vector<vector<char>> grid;
 
-  bool verticalCheck(int a, int b);
-  bool isVerticalReflection(int v);
-  int verticalReflectionFactor();
-  bool horizontalCheck(int a, int b);
-  bool isHorizontalReflection(int h);
-  int horizontalReflectionFactor();
+  int verticalCheck(int a, int b);
+  int isVerticalReflection(int v);
+  int verticalReflectionFactor(int v1, int v2);
+  int horizontalCheck(int a, int b);
+  int isHorizontalReflection(int h);
+  int horizontalReflectionFactor(int v1, int v2);
 };
 
 int part1(vector<LandScape> landscapes);
+int part2(vector<LandScape> landscapes);
 
 int main() {
   // ifstream file("sample");
@@ -44,79 +45,104 @@ int main() {
   }
   landscapes.push_back(LandScape{.grid = grid});
 
-  printf("Found %zu landscapes\n", landscapes.size());
-
   printf("Part 1: %d\n", part1(landscapes));
+  printf("Part 2: %d\n", part2(landscapes));
+}
+
+int part2(vector<LandScape> landscapes) {
+  int sumV = 0;
+  int sumH = 0;
+  for (LandScape l : landscapes) {
+    sumV += l.verticalReflectionFactor(0, 1);
+    sumH += l.horizontalReflectionFactor(0, 1);
+  }
+  return sumV + 100 * sumH;
 }
 
 int part1(vector<LandScape> landscapes) {
   int sumV = 0;
   int sumH = 0;
   for (LandScape l : landscapes) {
-    sumV += l.verticalReflectionFactor();
-    sumH += l.horizontalReflectionFactor();
+    sumV += l.verticalReflectionFactor(0, 0);
+    sumH += l.horizontalReflectionFactor(0, 0);
   }
   return sumV + 100 * sumH;
 }
 
-int LandScape::verticalReflectionFactor() {
+int LandScape::verticalReflectionFactor(int v1, int v2) {
   for (int i = 0; i < grid[0].size() - 1; i++) {
-    if (verticalCheck(i, i + 1) && isVerticalReflection(i)) {
+    int c = verticalCheck(i, i + 1);
+    int r = isVerticalReflection(i);
+    if ((c == v1 && r == v2) || (c == v2 && r == v1)) {
       return i + 1;
     }
   }
   return 0;
 }
 
-bool LandScape::isVerticalReflection(int line) {
+int LandScape::isVerticalReflection(int line) {
   int a = line;
   int b = line + 1;
+  int diff = 0;
   while (a > 0 && b < grid[0].size() - 1) {
     a--;
     b++;
-    if (!verticalCheck(a, b)) {
-      return false;
+    diff += verticalCheck(a, b);
+    if (diff > 1) {
+      return 2;
     }
   }
-  return true;
+  return diff;
 }
 
-bool LandScape::verticalCheck(int a, int b) {
+int LandScape::verticalCheck(int a, int b) {
+  int diff = 0;
   for (int i = 0; i < grid.size(); i++) {
     if (grid[i][a] != grid[i][b]) {
-      return false;
+      diff++;
+    }
+    if (diff > 1) {
+      return 2;
     }
   }
-  return true;
+  return diff;
 }
 
-int LandScape::horizontalReflectionFactor() {
+int LandScape::horizontalReflectionFactor(int v1, int v2) {
   for (int i = 0; i < grid.size() - 1; i++) {
-    if (horizontalCheck(i, i + 1) && isHorizontalReflection(i)) {
+    int c = horizontalCheck(i, i + 1);
+    int r = isHorizontalReflection(i);
+    if ((c == v1 && r == v2) || (c == v2 && r == v1)) {
       return i + 1;
     }
   }
   return 0;
 }
 
-bool LandScape::isHorizontalReflection(int h) {
+int LandScape::isHorizontalReflection(int h) {
   int a = h;
   int b = h + 1;
+  int diff = 0;
   while (a > 0 && b < grid.size() - 1) {
     a--;
     b++;
-    if (!horizontalCheck(a, b)) {
-      return false;
+    diff += horizontalCheck(a, b);
+    if (diff > 1) {
+      return 2;
     }
   }
-  return true;
+  return diff;
 }
 
-bool LandScape::horizontalCheck(int a, int b) {
+int LandScape::horizontalCheck(int a, int b) {
+  int diff = 0;
   for (int i = 0; i < grid[0].size(); i++) {
     if (grid[a][i] != grid[b][i]) {
-      return false;
+      diff++;
+    }
+    if (diff > 1) {
+      return 2;
     }
   }
-  return true;
+  return diff;
 }
